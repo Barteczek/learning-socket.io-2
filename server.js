@@ -6,7 +6,7 @@ const socket = require('socket.io');
 const tasks = [];
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '/client/src')));
+app.use(express.static(path.join(__dirname, '/client')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '/client/src/App.js'));

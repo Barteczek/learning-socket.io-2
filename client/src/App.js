@@ -3,22 +3,45 @@ import io from 'socket.io-client';
 
 class App extends React.Component {
 
-  socket = io('http://localhost:3000');
+  constructor() {
+    super();
+    this.socket = io('localhost:8000');
+    this.tasks = [];
+  }
 
-  componentDidMount(){
-    this.socket()
+  updateData(list) {
+    this.tasks = [];
+    list.forEach((element) => this.tasks.push(element));
+    this.forceUpdate();
+  }
+
+  removeTask(task) {
+    const index = this.tasks.indexOf(task);
+    this.tasks.splice(index, 1);
+    console.log(this.tasks);
+    this.socket.emit('removeTask', task);
+    this.forceUpdate();
+  }
+
+  addTask(event) {
+    event.preventDefault();
+    const taskContentInput = document.getElementById('task-name');
+    let task = taskContentInput.value;
+
+    if(!task.length) {
+      alert('You have to type something!');
+    }
+    else {
+      this.tasks.push(task);
+      this.socket.emit('addTask', task)
+      taskContentInput.value = '';
+      this.forceUpdate();
+    }
   }
 
   render() {
-    let tasks = ['Shopping', 'Go out with a dog'];
-    
-    socket.on('updateData', (list) => tasks = list)
 
-    const removeTask = (task) => {
-      // const index = tasks.indexOf(task);
-      // tasks.splice(index, 1);
-      socket.emit('removeTask', task)
-    }
+    this.socket.on('updateData', (list) => this.updateData(list));
 
     return (
       <div className="App">
@@ -31,11 +54,12 @@ class App extends React.Component {
           <h2>Tasks</h2>
     
           <ul className="tasks-section__list" id="tasks-list">
-            {tasks.map(task => (
-              <li class="task">{task}
+            {!this.tasks ? null : this.tasks.map((task, index) => (
+              <li className="task">{task}
                 <button 
-                  class="btn btn--red"
-                  onClick={removeTask(task)}
+                  className="btn btn--red"
+                  onClick={() => this.removeTask(task)}
+                  key={index}
                 >
                   Remove
                 </button>
@@ -44,8 +68,8 @@ class App extends React.Component {
           </ul>
     
           <form id="add-task-form">
-            <input className="text-input" autocomplete="off" type="text" placeholder="Type your description" id="task-name" />
-            <button className="btn" type="submit">Add</button>
+            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name"/>
+            <button className="btn" type="submit" onClick={(event) => this.addTask(event)}>Add</button>
           </form>
     
         </section>

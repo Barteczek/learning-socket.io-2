@@ -3,13 +3,13 @@ const path = require('path');
 const app = express();
 const socket = require('socket.io');
 
-const tasks = [];
+const tasks = ['hehe', 'haha'];
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '/client')));
+app.use(express.static(path.join(__dirname, '/client/build')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '/client/src/App.js'));
+  res.sendFile(path.join(__dirname, '/client/build/index.html'));
 });
 
 const server = app.listen(8000, () => {
@@ -20,19 +20,19 @@ const io = socket(server);
 
 io.on('connection', (socket) => {
   console.log('New client! Its id – ' + socket.id);
-  
   socket.emit('updateData', tasks);
 
-  socket.on('removeTask', ({task}) => {
-    for(i = 0; i < tasks.length; i++) {
-      if(tasks[i] === task) {
-        tasks.splice(i, 1);
-        socket.broadcast.emit('updateData', tasks);
-      }
-    }
+  socket.on('updateData', (tasks) => {
+    socket.broadcast.emit('updateData', tasks);
   });
 
-  socket.on('addTask', ({task}) => {
+  socket.on('removeTask', (task) => {
+    const index = tasks.indexOf(task);
+    tasks.splice(index, 1);
+    socket.broadcast.emit('updateData', tasks);
+  });
+
+  socket.on('addTask', (task) => {
     tasks.push(task)
     socket.broadcast.emit('updateData', tasks);
       
@@ -40,15 +40,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => { 
     console.log('Oh, socket ' + socket.id + ' has left') 
-    for(i = 0; i < users.length; i++) {
-      if(users[i].id === socket.id) {
-        socket.broadcast.emit('message', {
-          author: 'Chat Bot',
-          content: `${users[i].name} has left the conversation...`,
-        });
-        users.splice(i, 1);
-      }
-    }
+    
   });
   console.log('I\'ve added a listener on message event \n');
 });

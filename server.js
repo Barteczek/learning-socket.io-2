@@ -2,8 +2,11 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const socket = require('socket.io');
+const cors = require('cors');
 
-const tasks = ['hehe', 'haha'];
+const tasks = ['Shopping', 'Go out with a dog'];
+
+app.use(cors());
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '/client/build')));

@@ -4,7 +4,7 @@ const app = express();
 const socket = require('socket.io');
 const cors = require('cors');
 
-const tasks = ['Shopping', 'Go out with a dog'];
+const tasks = [{ id: 'dfsadf3fds24s', name: 'Shopping'}, { id: 'dfs2ad67thet24s', name: 'Go out with a dog'}];
 
 app.use(cors());
 
@@ -29,8 +29,8 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('updateData', tasks);
   });
 
-  socket.on('removeTask', (task) => {
-    const index = tasks.indexOf(task);
+  socket.on('removeTask', (id) => {
+    const index = tasks.findIndex(task => task.id === id)
     tasks.splice(index, 1);
     socket.broadcast.emit('updateData', tasks);
   });

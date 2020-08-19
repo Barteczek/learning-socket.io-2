@@ -1,5 +1,6 @@
 import React from 'react';
 import io from 'socket.io-client';
+import uuid from 'uuid';
 
 class App extends React.Component {
 
@@ -11,15 +12,17 @@ class App extends React.Component {
 
   updateData(list) {
     this.tasks = [];
-    list.forEach((element) => this.tasks.push(element));
+    list.forEach((element) => {
+      
+      this.tasks.push(element);
+    });
     this.forceUpdate();
   }
 
-  removeTask(task) {
-    const index = this.tasks.indexOf(task);
+  removeTask(id) {
+    const index = this.tasks.findIndex(task => task.id === id)
     this.tasks.splice(index, 1);
-    console.log(this.tasks);
-    this.socket.emit('removeTask', task);
+    this.socket.emit('removeTask', id);
     this.forceUpdate();
   }
 
@@ -32,15 +35,18 @@ class App extends React.Component {
       alert('You have to type something!');
     }
     else {
-      this.tasks.push(task);
-      this.socket.emit('addTask', task)
+      const newTask = {
+        id: uuid(), 
+        name: task,
+      }
+      this.tasks.push(newTask);
+      this.socket.emit('addTask', newTask)
       taskContentInput.value = '';
       this.forceUpdate();
     }
   }
 
   render() {
-
     this.socket.on('updateData', (list) => this.updateData(list));
 
     return (
@@ -54,12 +60,12 @@ class App extends React.Component {
           <h2>Tasks</h2>
     
           <ul className="tasks-section__list" id="tasks-list">
-            {!this.tasks ? null : this.tasks.map((task, index) => (
-              <li className="task">{task}
+            {!this.tasks ? null : this.tasks.map(({ id, name }) => (
+              <li className="task">{name}
                 <button 
                   className="btn btn--red"
-                  onClick={() => this.removeTask(task)}
-                  key={index}
+                  onClick={() => this.removeTask(id)}
+                  key={id}
                 >
                   Remove
                 </button>

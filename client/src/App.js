@@ -7,23 +7,21 @@ class App extends React.Component {
   constructor() {
     super();
     this.socket = io('localhost:8000');
-    this.tasks = [];
+    this.state = { tasks: [] }
   }
 
   updateData(list) {
-    this.tasks = [];
+    const tasks = [];
     list.forEach((element) => {
-      
-      this.tasks.push(element);
+      tasks.push(element);
     });
-    this.forceUpdate();
+    this.setState({tasks: tasks});
   }
 
   removeTask(id) {
-    const index = this.tasks.findIndex(task => task.id === id)
-    this.tasks.splice(index, 1);
+    const index = this.state.tasks.findIndex(task => task.id === id)
+    this.setState({tasks: this.state.tasks.splice(index, 1)});
     this.socket.emit('removeTask', id);
-    this.forceUpdate();
   }
 
   addTask(event) {
@@ -39,10 +37,11 @@ class App extends React.Component {
         id: uuid(), 
         name: task,
       }
-      this.tasks.push(newTask);
+      const tasks = this.state.tasks;
+      tasks.push(newTask)
+      this.setState({tasks: tasks})
       this.socket.emit('addTask', newTask)
       taskContentInput.value = '';
-      this.forceUpdate();
     }
   }
 
@@ -60,7 +59,7 @@ class App extends React.Component {
           <h2>Tasks</h2>
     
           <ul className="tasks-section__list" id="tasks-list">
-            {!this.tasks ? null : this.tasks.map(({ id, name }) => (
+            {this.state.tasks.map(({ id, name }) => (
               <li className="task">{name}
                 <button 
                   className="btn btn--red"

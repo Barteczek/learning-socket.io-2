@@ -45,5 +45,4 @@ io.on('connection', (socket) => {
     console.log('Oh, socket ' + socket.id + ' has left') 
     
   });
-  console.log('I\'ve added a listener on message event \n');
 });
